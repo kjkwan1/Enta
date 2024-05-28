@@ -15,6 +15,7 @@ constants/
 hooks/
 scripts/
 auth/
+android/
 
 # macOS
 .DS_Store
