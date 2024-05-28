@@ -5,5 +5,6 @@ export interface MachineGlobalContext {
     error: unknown;
     recording: Audio.Recording | undefined;
     hasPermission: boolean;
-  }
+    base64Audio: string;
+}
   

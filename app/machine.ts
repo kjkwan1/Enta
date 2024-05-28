@@ -1,10 +1,10 @@
 import { assign, setup } from "xstate";
 
-import { getUserPermission } from "./guards/getUserPermission";
+import { startRecording, endRecording } from "@/actors/recording";
+import { getUserPermission } from "@/actors/getUserPermission";
+import { uploadFile } from "@/actors/uploadFile";
 
-import { startRecording, endRecording } from "./actors/recording";
-
-import { MachineGlobalContext } from "./interface/machineGlobalContext";
+import { MachineGlobalContext } from "@/interface/MachineGlobalContext";
 
 export const machine = setup({
   types: {
@@ -27,8 +27,9 @@ export const machine = setup({
     getUserPermission,
     startRecording,
     endRecording,
+    uploadFile,
   },
-  guards: {
+  guards: { 
     beyondThreshold: function ({ context, event }) {
       // Add your guard condition here
       return true;
@@ -44,6 +45,7 @@ export const machine = setup({
     error: null,
     recording: undefined,
     hasPermission: false,
+    base64Audio: '',
   },
   id: "noteApp",
   initial: "home",
@@ -143,21 +145,28 @@ export const machine = setup({
           src: 'endRecording',
           input: ({ context }) => ({ recording: context.recording }),
           onDone: {
+            actions: [
+              assign({
+                base64Audio: ({ event }) => event.output
+              })
+            ],
             target: 'processingSpeech',
-            actions: assign({
-              recording: undefined
-            })
           },
           onError: {
             target: 'home',
             reenter: true,
             actions: assign({
-              error: (context, event) => event,  
+              error: (context, event) => console.log(context, event),  
             })
           }
       },
     },
     processingSpeech: {
+      invoke: {
+        id: 'fileUpload',
+        src: 'uploadFile',
+        input: ({ context }) => ({ base64Audio: context.base64Audio, recording: context.recording })
+      },
       on: {
         ai_parsed: [
           {
