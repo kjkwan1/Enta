@@ -17,6 +17,7 @@ scripts/
 auth/
 android/
 .env
+.env.d.ts
 
 # macOS
 .DS_Store
