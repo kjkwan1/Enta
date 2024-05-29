@@ -16,6 +16,7 @@ hooks/
 scripts/
 auth/
 android/
+.env
 
 # macOS
 .DS_Store

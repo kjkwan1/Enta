@@ -38,6 +38,9 @@ export const machine = setup({
       // Add your guard condition here
       return true;
     },
+    isAuthenticated: ({context, event}) => {
+      return true;
+    }
   },
 }).createMachine({
   context: {

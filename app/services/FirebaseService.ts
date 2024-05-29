@@ -1,5 +1,5 @@
 import { FirebaseApp, initializeApp } from 'firebase/app';
-import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
+import { initializeAuth, getReactNativePersistence, getAuth } from 'firebase/auth';
 import { User } from "firebase/auth";
 
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
@@ -8,26 +8,35 @@ import config from '../../auth/google-services.json';
 
 export class FirebaseService {
     private static instance: FirebaseService;
-    private user: User;
-    private app: FirebaseApp;
+    public static isInitialized = false;
 
-    constructor() {
+    private user!: User;
+    private app!: FirebaseApp;
+
+    public async init(): Promise<void> {
         this.app = initializeApp({
             apiKey: config.client[0].api_key[0].current_key,
+            appId: config.client[0].client_info.mobilesdk_app_id,
             projectId: config.project_info.project_id,
+            authDomain: config.project_info.authDomain,
         });
+        console.log('app instance: ', this.app);
         if (!this.app) {
             throw new Error('Failed to initialize Firebase App');
         }
-        const user = initializeAuth(this.app, {
-            persistence: getReactNativePersistence(ReactNativeAsyncStorage)
-        }).currentUser
-        if (!user) {
-            console.log('no current', user)
-            throw new Error('No current user found');
+        const persistence = getReactNativePersistence(ReactNativeAsyncStorage);
+        const auth = initializeAuth(this.app, { persistence });
+        await new Promise((resolve) => {
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    resolve(user);
+                }
+            })
+        })
+        if (auth.currentUser) {
+            this.user = auth.currentUser;
+            FirebaseService.isInitialized = true;
         }
-        this.user = user;
-    
     }
 
     public static getInstance(): FirebaseService {
@@ -38,6 +47,6 @@ export class FirebaseService {
     }
 
     public getToken() {
-        return this.user.getIdToken();
+        return this.user.getIdToken(true);
     }
 }
