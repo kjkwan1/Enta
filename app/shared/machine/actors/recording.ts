@@ -1,4 +1,4 @@
-import ConfigurationService from "@/services/ConfigurationService";
+import ConfigurationService from "@/shared/services/ConfigurationService";
 import { Audio } from "expo-av";
 import { AndroidAudioEncoder, IOSOutputFormat, RecordingOptionsPresets } from "expo-av/build/Audio";
 import * as FileSystem from "expo-file-system";
@@ -30,8 +30,6 @@ export const startRecording = fromPromise(async () => {
         }
       };
 
-      const android = {
-      }
       await recording.prepareToRecordAsync(configs);
       await recording.startAsync();
     } catch (error) {
@@ -65,9 +63,7 @@ export const endRecording = fromPromise(async ({ input }: { input: { recording: 
 
 const getLinear16Base64 = async (uri: string) => {
   const outPath = `${FileSystem.cacheDirectory}output.wav`;
-  console.log('outPath: ', outPath);
   const cmd = `-y -i ${uri} -acodec pcm_s16le -ar 16000 -ac 1 ${outPath}`;
-  console.log('cmd: ', cmd);
 
   let base64Data: string = '';
   try {

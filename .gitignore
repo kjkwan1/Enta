@@ -16,8 +16,11 @@ hooks/
 scripts/
 auth/
 android/
-.env
-.env.d.ts
+.env*
+env.d.ts
+
+
+eas.json
 
 # macOS
 .DS_Store

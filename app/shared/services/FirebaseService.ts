@@ -1,14 +1,22 @@
 import { FirebaseApp, initializeApp } from 'firebase/app';
-import { initializeAuth, getReactNativePersistence, getAuth } from 'firebase/auth';
+import { initializeAuth, getReactNativePersistence, signInWithEmailAndPassword } from 'firebase/auth';
 import { User } from "firebase/auth";
 
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 
-import config from '../../auth/google-services.json';
+import config from '../../../auth/google-services.json';
 
-export class FirebaseService {
+class FirebaseService {
     private static instance: FirebaseService;
-    public static isInitialized = false;
+    private _isInitialized = false;
+
+    get isInitialized() {
+        return this._isInitialized;
+    }
+
+    set isInitialized(value: boolean) {
+        this._isInitialized = value;
+    }
 
     private user!: User;
     private app!: FirebaseApp;
@@ -20,23 +28,15 @@ export class FirebaseService {
             projectId: config.project_info.project_id,
             authDomain: config.project_info.authDomain,
         });
-        console.log('app instance: ', this.app);
         if (!this.app) {
             throw new Error('Failed to initialize Firebase App');
         }
         const persistence = getReactNativePersistence(ReactNativeAsyncStorage);
         const auth = initializeAuth(this.app, { persistence });
-        await new Promise((resolve) => {
-            auth.onAuthStateChanged((user) => {
-                if (user) {
-                    resolve(user);
-                }
-            })
-        })
-        if (auth.currentUser) {
-            this.user = auth.currentUser;
-            FirebaseService.isInitialized = true;
-        }
+        const userCred = await signInWithEmailAndPassword(auth, "123", "123");
+
+        this.user = userCred.user;
+        this.isInitialized = true
     }
 
     public static getInstance(): FirebaseService {
@@ -50,3 +50,5 @@ export class FirebaseService {
         return this.user.getIdToken(true);
     }
 }
+
+export const firebaseService = FirebaseService.getInstance();

@@ -1,5 +1,6 @@
-import { MachineConfig } from "@/interface/MachineConfig";
+import { MachineConfig } from "@/shared/interface/MachineConfig";
 import { Platform } from "react-native";
+import Config from "react-native-config";
 
 export default class ConfigurationService {
     private static instance: ConfigurationService;

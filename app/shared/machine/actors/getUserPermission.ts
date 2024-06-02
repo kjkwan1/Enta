@@ -11,7 +11,6 @@ export const getUserPermission = fromPromise(async ({ input }: { input: { hasPer
   const result = await requestPermission();
 
   if (!result || !result.granted) {
-    console.log('failed to get permission');
     throw new Error('Permission Denied');
   }
 
